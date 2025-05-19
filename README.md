@@ -58,26 +58,23 @@ interface IProduct {
 
 ```
 interface ICatalogData {
+    _preview: string | null;
     getProduct(id: string): IProduct;
+    getProducts(): IProduct[];
     setProducts(items: IProduct[]): void
 }
-```
-
-Данные карточки товара, используемые в корзине
-
-```
-type TBasketItem = Pick<IProduct, 'id' | 'title' | 'price'>;
 ```
 Интерфейс для модели данных Корзины
 
 ```
 interface IBasketData {
-    addItem(item: TBasketItem): void;
+    addItem(item: IProduct): void;
     deleteItem(id: string): void;
     getCounter(): number;
-    getItems(): TBasketItem[];
-    getItem(id: string): TBasketItem;
+    getItems(): IProduct[];
+    getItem(id: string): IProduct;
     hasItem(id: string): boolean;
+    getTotalPrice(items: IProduct[]): number
 }
 ```
 Тип данных метода оплаты
@@ -172,6 +169,7 @@ export interface IOrderResult {
 
 Методы класса:
 - getProduct(id: string): IProduct - возвращает один товар по id
+- getProducts(): IProduct[]; - возвращает массив товаров
 - setProducts(items: IProduct[]): void - заполняет массив карточек и вызывает событие изменения массива
 - сеттер и геттер для свойства `preview`
 
@@ -179,17 +177,17 @@ export interface IOrderResult {
 Класс отвечает за хранение и работу с данными товаров, добавленных в корзину.\
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
-- basketItems: TBasketItem[] - массив карточек товаров
-- totalPrice: number - общая стоимость корзины
+- basketItems: IProduct[] - массив карточек товаров
 - events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных
 
 Методы класса:
-- addItem(item: TBasketItem): void - добавляет один товар в массив и вызывает событие изменения массива
+- addItem(item: IProduct): void - добавляет один товар в массив и вызывает событие изменения массива
 - deleteItem(id: string): void - удаляет один товар из массива и вызывает событие изменения массива
 - getCounter(): number - возвращает длину масива карточек товара
-- getItem(id: string): TBasketItem - возвращает один товар из корзины по id
-- getItems(): TBasketItem[] - возвращает массив товаров, находящихся в корзине
-- сеттер и геттер для свойства `total`
+- getItem(id: string): IProduct - возвращает один товар из корзины по id
+- getItems(): IProduct[] - возвращает массив товаров, находящихся в корзине
+- hasItem(id: string): boolean - проверяет наличие товара в корзине
+- getTotalPrice(items: IProduct[]): number - возвращает общую стоимость товаров в массиве
 
 #### Класс UserData
 Класс отвечает за хранение и работу с данными пользователя.\
@@ -201,6 +199,8 @@ export interface IOrderResult {
 Методы класса:
 - setUser(data: {field: keyof IUser, value: string}): void - устанавливает данные пользователя
 - getUser(): IUser - возвращает данные пользователя
+- isPayment(value: string): value is TMethodOfPayment - проверяет тип данных меода оплаты
+- checkUserValidation(data: Record<keyof IUser, string>): boolean - валидирует данные пользователя
 
 ### Слой представления
 Все классы представления отвечают за отображение внутри контейнера (DOM элемент) передаваемых данных.

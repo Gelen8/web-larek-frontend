@@ -4,24 +4,24 @@ export interface IProduct {
     image: string;
     title: string;
     category: string;
-    price: number;
+    price: number | null;
 }
 
 export interface ICatalogData {
+    _preview: string | null;
     getProduct(id: string): IProduct;
+    getProducts(): IProduct[];
     setProducts(items: IProduct[]): void
-
 }
 
-export type TBasketItem = Pick<IProduct, 'id' | 'title' | 'price'>;
-
 export interface IBasketData {
-    addItem(item: TBasketItem): void;
+    addItem(item: IProduct): void;
     deleteItem(id: string): void;
     getCounter(): number;
-    getItems(): TBasketItem[];
-    getItem(id: string): TBasketItem;
+    getItems(): IProduct[];
+    getItem(id: string): IProduct;
     hasItem(id: string): boolean;
+    getTotalPrice(items: IProduct[]): number
 }
 
 export type TMethodOfPayment = 'Онлайн' | 'При получении';
@@ -36,6 +36,8 @@ export interface IUser {
 export interface IUserData {
     setField (data: Record<keyof IUser, string>): void;
     getUser(): IUser;
+    isPayment(value: string): value is TMethodOfPayment;
+    checkUserValidation(data: Record<keyof IUser, string>): boolean
 }
 
 export type TOrderForm = Pick<IUser, 'payment' | 'address'>;
