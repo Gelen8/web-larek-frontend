@@ -74,20 +74,20 @@ interface IBasketData {
     getItems(): IProduct[];
     getItem(id: string): IProduct;
     hasItem(id: string): boolean;
-    getTotalPrice(items: IProduct[]): number
+    getTotalPrice(): number
 }
 ```
 Тип данных метода оплаты
 
 ```
-type TMethodOfPayment = 'Онлайн' | 'При получении';
+type TMethodOfPayment = 'online' | 'cash';
 
 ```
 Данные пользователя для совершения заказа
 
 ```
 interface IUser {
-    payment: TMethodOfPayment;
+    payment: string;
     address: string;
     email: string;
     phone: string;
@@ -96,8 +96,10 @@ interface IUser {
 Интерфейс для модели данных пользователя
 ```
 interface IUserData {
-    setField (data: Record<keyof IUser, string>): void;
-    getUser(): IUser;
+    error: string;
+    setUserData (data: IUser): void;
+    getUserData(): IUser;
+    checkUserValidation(data: Partial<IUser>): boolean
 }
 ```
 Данные для формы оформления заказа
@@ -187,20 +189,22 @@ export interface IOrderResult {
 - getItem(id: string): IProduct - возвращает один товар из корзины по id
 - getItems(): IProduct[] - возвращает массив товаров, находящихся в корзине
 - hasItem(id: string): boolean - проверяет наличие товара в корзине
-- getTotalPrice(items: IProduct[]): number - возвращает общую стоимость товаров в массиве
+- getTotalPrice(): number - возвращает общую стоимость товаров в массиве
 
 #### Класс UserData
 Класс отвечает за хранение и работу с данными пользователя.\
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
 - userData: IUser - данные пользователя
+- _error: - текст ошибки валидации
 - events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных
 
 Методы класса:
-- setUser(data: {field: keyof IUser, value: string}): void - устанавливает данные пользователя
-- getUser(): IUser - возвращает данные пользователя
-- isPayment(value: string): value is TMethodOfPayment - проверяет тип данных меода оплаты
-- checkUserValidation(data: Record<keyof IUser, string>): boolean - валидирует данные пользователя
+- setUserData (data: IUser): void; - устанавливает данные пользователя
+- getUserData(): IUser - возвращает данные пользователя
+- checkUserValidation(data: Partial<IUser>): boolean - валидирует данные пользователя
+
+Геттер для свойства `error`
 
 ### Слой представления
 Все классы представления отвечают за отображение внутри контейнера (DOM элемент) передаваемых данных.
@@ -257,6 +261,10 @@ export interface IOrderResult {
 - price
 - id
 
+Геттеры для свойств:
+- title
+- id
+
 #### Класс CardCatalog
 Реализует отображение карточки товара в каталоге товаров. 
 - constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поиск необходимых элементов разметки и устанвливается слушатель на кнопку, которой является сама карточка и генерируется соответствующее событие.
@@ -266,7 +274,6 @@ export interface IOrderResult {
 Поля класса:
 - productCategory: HTMLElement
 - productImage: HTMLElement
-- cardButton: HTMLButtonElement
 - events: IEvents - брокер событий
 
 Сеттеры для свойств:
@@ -366,7 +373,7 @@ export interface IOrderResult {
 - total
 
 ### Слой коммуникации
-#### Класс appApi
+#### Класс AppApi
 Наследуется от базового класса Api, предоставляет методы реализующие взаимодействие с бэкэндом сервиса:
 
 Методы класса:

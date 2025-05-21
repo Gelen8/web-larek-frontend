@@ -8,7 +8,7 @@ export interface IProduct {
 }
 
 export interface ICatalogData {
-    _preview: string | null;
+    preview: string | null;
     getProduct(id: string): IProduct;
     getProducts(): IProduct[];
     setProducts(items: IProduct[]): void
@@ -21,23 +21,23 @@ export interface IBasketData {
     getItems(): IProduct[];
     getItem(id: string): IProduct;
     hasItem(id: string): boolean;
-    getTotalPrice(items: IProduct[]): number
+    getTotalPrice(): number
 }
 
-export type TMethodOfPayment = 'Онлайн' | 'При получении';
+export type TMethodOfPayment = 'online' | 'cash';
 
 export interface IUser {
-    payment: TMethodOfPayment;
+    payment: string;
     address: string;
     email: string;
     phone: string;
 }
 
 export interface IUserData {
-    setField (data: Record<keyof IUser, string>): void;
-    getUser(): IUser;
-    isPayment(value: string): value is TMethodOfPayment;
-    checkUserValidation(data: Record<keyof IUser, string>): boolean
+    error: string;
+    setUserData (data: IUser): void;
+    getUserData(): IUser;
+    checkUserValidation(data: Partial<IUser>): boolean
 }
 
 export type TOrderForm = Pick<IUser, 'payment' | 'address'>;
