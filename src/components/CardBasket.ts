@@ -1,12 +1,12 @@
 import { ensureElement } from "../utils/utils";
 import { IEvents } from "./base/events";
-import { Card } from "./Card";
+import { Card } from "./common/Card";
 
-export interface TCardBasket {
+interface ICardBasket {
     index: number;
 }
 
-export class CardBasket extends Card<TCardBasket> {
+export class CardBasket extends Card<ICardBasket> {
     protected idexElement: HTMLElement;
     protected deleteButton: HTMLButtonElement;
     protected events: IEvents;
@@ -15,10 +15,10 @@ export class CardBasket extends Card<TCardBasket> {
         super(container);
         this.events = events;
 
-        this.idexElement = ensureElement('.basket__item-index', container);
-        this.deleteButton = ensureElement('.basket__item-delete', container) as HTMLButtonElement;
+        this.idexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
+        this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
 
-        this.deleteButton.addEventListener('click', () => this.events.emit('card:delete'))
+        this.deleteButton.addEventListener('click', () => this.events.emit('card:delete', {card: this}))
     }
 
     set index(value: number) {

@@ -21,10 +21,9 @@ export interface IBasketData {
     getItems(): IProduct[];
     getItem(id: string): IProduct;
     hasItem(id: string): boolean;
-    getTotalPrice(): number
+    getTotalPrice(): number;
+    clearBasket(): void;
 }
-
-export type TMethodOfPayment = 'online' | 'cash';
 
 export interface IUser {
     payment: string;
@@ -35,9 +34,11 @@ export interface IUser {
 
 export interface IUserData {
     error: string;
-    setUserData (data: IUser): void;
-    getUserData(): IUser;
-    checkUserValidation(data: Partial<IUser>): boolean
+    setUserData (data: Partial<IUser>): void;
+    getUserData(): Partial<IUser>;
+    checkOrderValidation(data: Partial<IUser>): boolean;
+    checkContactsValidation(): boolean;
+    clearUserData(): void;
 }
 
 export type TOrderForm = Pick<IUser, 'payment' | 'address'>;

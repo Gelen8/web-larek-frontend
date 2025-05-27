@@ -1,9 +1,9 @@
 import { IProduct } from "../types";
 import { ensureElement } from "../utils/utils";
 import { IEvents } from "./base/events";
-import { Card } from "./Card";
+import { Card } from "./common/Card";
 
-export type TCardModal = Pick<IProduct, 'category' | 'description' | 'image'>
+type TCardModal = Pick<IProduct, 'category' | 'description' | 'image'>
 
 export class CardModal extends Card<TCardModal> {
     protected productCategory: HTMLElement;
@@ -16,10 +16,10 @@ export class CardModal extends Card<TCardModal> {
         super(container);
         this.events = events;
 
-        this.productCategory = ensureElement('.card__category', container);
-        this.productImage = ensureElement('.card__image', container) as HTMLImageElement;
-        this.productDescription = ensureElement('.card__text', container)
-        this.cardButton = ensureElement('.card__button', container) as HTMLButtonElement;
+        this.productCategory = ensureElement<HTMLElement>('.card__category', this.container);
+        this.productImage = ensureElement<HTMLImageElement>('.card__image', this.container);
+        this.productDescription = ensureElement<HTMLElement>('.card__text', this.container);
+        this.cardButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
 
         this.cardButton.addEventListener('click', () => this.events.emit('basket:change', {card: this}));
     }
@@ -42,5 +42,9 @@ export class CardModal extends Card<TCardModal> {
         } else {
             this.setText(this.cardButton, 'В корзину')
         }
+    }
+
+    changeActiveButton(value: boolean) {
+        this.setDisabled(this.cardButton, value);
     }
 }

@@ -58,7 +58,7 @@ interface IProduct {
 
 ```
 interface ICatalogData {
-    _preview: string | null;
+    preview: string | null;
     getProduct(id: string): IProduct;
     getProducts(): IProduct[];
     setProducts(items: IProduct[]): void
@@ -75,13 +75,8 @@ interface IBasketData {
     getItem(id: string): IProduct;
     hasItem(id: string): boolean;
     getTotalPrice(): number
+    clearBasket(): void;
 }
-```
-Тип данных метода оплаты
-
-```
-type TMethodOfPayment = 'online' | 'cash';
-
 ```
 Данные пользователя для совершения заказа
 
@@ -97,9 +92,11 @@ interface IUser {
 ```
 interface IUserData {
     error: string;
-    setUserData (data: IUser): void;
-    getUserData(): IUser;
-    checkUserValidation(data: Partial<IUser>): boolean
+    setUserData (data: Partial<IUser>): void;
+    getUserData(): Partial<IUser>;
+    checkOrderValidation(data: Partial<IUser>): boolean;
+    checkContactsValidation(): boolean;
+    clearUserData(): void;
 }
 ```
 Данные для формы оформления заказа
@@ -190,6 +187,7 @@ export interface IOrderResult {
 - getItems(): IProduct[] - возвращает массив товаров, находящихся в корзине
 - hasItem(id: string): boolean - проверяет наличие товара в корзине
 - getTotalPrice(): number - возвращает общую стоимость товаров в массиве
+- clearBasket(): void - очищает массив товаров
 
 #### Класс UserData
 Класс отвечает за хранение и работу с данными пользователя.\
@@ -200,9 +198,11 @@ export interface IOrderResult {
 - events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных
 
 Методы класса:
-- setUserData (data: IUser): void; - устанавливает данные пользователя
-- getUserData(): IUser - возвращает данные пользователя
-- checkUserValidation(data: Partial<IUser>): boolean - валидирует данные пользователя
+- setUserData (data: Partial<IUser>): void; - устанавливает данные пользователя
+- getUserData(): Partial<IUser> - возвращает данные пользователя
+- checkOrderValidation(data: Partial<IUser>): boolean - валидирует данные пользователя для формы заказа
+- checkContactsValidation(): boolean - валидирует данные пользователя для формы контактов
+- clearUserData(): void - очищает данные пользователя
 
 Геттер для свойства `error`
 
@@ -223,8 +223,11 @@ export interface IOrderResult {
 - events: IEvents - брокер событий
 
 Сеттеры для свойств:
-- productsList
+- catalog
 - counter
+
+Методы класса:
+- setLocked(value: boolean): void - блокирует прокрутку страницы, добавляя необходимый класс
 
 #### Класс Modal
 Реализует отображение модального окна.
@@ -262,7 +265,6 @@ export interface IOrderResult {
 - id
 
 Геттеры для свойств:
-- title
 - id
 
 #### Класс CardCatalog
@@ -299,7 +301,8 @@ export interface IOrderResult {
 - description
 
 Методы класса:
--changeButtonText(value: boolean): void - меняет текст кнопки
+- changeButtonText(value: boolean): void - меняет текст кнопки
+- changeActiveButton(value: boolean): void - меняет активность кнопки
 
 #### Класс CardBasket
 Реализует отображение карточки товара в корзине. 
@@ -317,7 +320,7 @@ export interface IOrderResult {
 
 #### Класс Basket
 Реализует отображение Корзины товаров.
-- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поик необходимых элементов разметки и устанвливается слушатель на кнопку оформления заказа и генерируется соответствующее событие.
+- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поиск необходимых элементов разметки и устанвливается слушатель на кнопку оформления заказа и генерируется соответствующее событие.
 
 В метод `render` принимает данные, необходимые для отображения Корзины. 
 
@@ -330,22 +333,31 @@ export interface IOrderResult {
 - itemsList
 - total
 
+Методы класса:
+- changeActiveButton(value: boolean): void - меняет активность кнопки
+
 #### Класс Form
 Абстрактный класс, является дженериком и родителем всех компонентов, ргеализующих отображение форм. В дженерик принимает тип объекта, в котором данные будут передаваться в метод `render` для отображения данных в компоненте.
-- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поик необходимых элементов разметки и на форму устанвливаются слушатели событий `input`и `submit` и генерируются соответствующие события.
+- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поиск необходимых элементов разметки и на форму устанвливаются слушатели событий `input`и `submit` и генерируются соответствующие события.
 
 Поля класса:
 - submitButton: HTMLButtonElement
 - errorsElement: HTMLElement
+- inputs: NodeListOf<HTMLInputElement>
 
 Сеттеры для свойств:
 - valid
 - errors
 
+Методы класса:
+- getInputValues(): Record<string, string> - возвращает объект полей ввода формы и их значений
 
-#### Класс FormOrder
+#### Класс OrderForm
 Реализует отображение формы оформления заказа.
-- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поик необходимых элементов разметки. 
+- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поиск необходимых элементов разметки. 
+
+Поля класса:
+- buttonsElement: HTMLButtonElement[]
 
 Сеттеры для свойств:
 - payment
@@ -353,7 +365,7 @@ export interface IOrderResult {
 
 #### Класс FormContacts
 Реализует отображение формы контактной информации.
-- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поик необходимых элементов разметки.
+- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий.
 
 Сеттеры для свойств:
 - phone
@@ -361,7 +373,7 @@ export interface IOrderResult {
 
 #### Класс Success
 Реализует отображение сообщения об успешной оплате.
-- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поик необходимых элементов разметки, устанвливается слушатель на кнопку и генерируется соответствующее событие.
+- constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и объект с обработчиком клика. В конструкторе происходит поиск необходимых элементов разметки, устанвливается слушатель на кнопку.
 
 В метод `render` принимает данные, необходимые для отображения окна успеха. 
 
@@ -390,16 +402,20 @@ export interface IOrderResult {
 - `cards:changed` - изменение массива карточек товаров в каталоге
 - `basket:changed` - изменение массива карточек товаров в корзине
 - `card:selected` - изменение открываемой в модальном окне карточки
+- `user-order:changed` - изменение данных пользователя для заказа
+- `user-contacts:changed` - изменение контактных данных пользователя
 
 *События, возникающие при взаимодействии пользователя с интерфейсом (генерируются классами, отвечающими за представление)*
 - `basket:open` - открытие Корзины в модальном окне
-- `basket:order` - оформление Корзины
+- `order:open` - клик по кнопке "Оформить" в корзине
 - `card:select` - выбор карточки для отображения в модальном окне
-- `card:add` - выбор карточки для добавления в Корзину
-- `card:delete` - выбор карточки для удаления из Корзины
+- `basket:change` - клик на добавление/удаление карточки из корзины
+- `modal:open` - открытие модальнорго окна
 - `modal:close` - закрытие модальнорго окна
-- `order:input` - изменение данных в форме заказа
-- `contacts:input` - изменение данных в форме контактов
-- `order:submit` - сохранение данных заказа
-- `contacts:submit` - сохранение контактных данных и отправка заказа на сервер
-- `success:close` - возвращение на главную страницу
+- `card:delete` - клик в Корзине на удаление карточки
+- `order:submit` - открытие формы контактных данных
+- `contacts:submit` - отправка заказа на сервер
+- `payment:change` - изменение способа оплаты
+- `order.adress:change` - изменение данных в поле ввода адреса
+- `contacts.email:change` - изменение данных в поле ввода почты
+- `contacts.phone.change` - изменение данных в поле ввода ьелефона

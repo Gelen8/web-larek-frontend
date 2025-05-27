@@ -21,11 +21,19 @@ export class BasketData implements IBasketData {
     }
 
     getItems(): IProduct[] {
-        return this.basketItems;
+        if(this.basketItems) {
+            return this.basketItems;
+        } else {
+            return [];
+        };
     }
 
     getCounter(): number {
-        return this.basketItems.length;
+        if(this.basketItems){
+            return this.basketItems.length;
+        } else {
+            return 0;
+        }; 
     }
 
     getItem(id: string): IProduct {
@@ -37,6 +45,15 @@ export class BasketData implements IBasketData {
     }
 
     getTotalPrice(): number {
-        return this.basketItems.reduce((prev, item) => prev + item.price, 0);
+        if(this.basketItems){
+            return this.basketItems.reduce((prev, item) => prev + item.price, 0);
+        } else {
+            return 0;
+        };
+    }
+
+    clearBasket() {
+        this.basketItems = [];
+        this.events.emit('basket:changed');
     }
 }

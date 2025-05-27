@@ -27,7 +27,7 @@ export class CatalogData implements ICatalogData {
         if(!id) {
             this._preview = null;
             return;
-        }
+        };
 
         const selectedCard = this.getProduct(id);
 

@@ -1,9 +1,9 @@
 import { IProduct} from "../types";
 import { ensureElement } from "../utils/utils";
 import { IEvents } from "./base/events";
-import { Card } from "./Card";
+import { Card } from "./common/Card";
 
-export type TCardCatalog = Pick<IProduct, 'image' | 'category'>
+type TCardCatalog = Pick<IProduct, 'image' | 'category'>
 
 export class CardCatalog extends Card<TCardCatalog> {
     protected productCategory: HTMLElement;
@@ -14,8 +14,8 @@ export class CardCatalog extends Card<TCardCatalog> {
         super(container);
         this.events = events;
 
-        this.productCategory = ensureElement<HTMLElement>('.card__category', container);
-        this.productImage = ensureElement<HTMLImageElement>('.card__image', container) as HTMLImageElement;
+        this.productCategory = ensureElement<HTMLElement>('.card__category', this.container);
+        this.productImage = ensureElement<HTMLImageElement>('.card__image', this.container);
 
         this.container.addEventListener('click', () => this.events.emit('card:select', {card: this}));
     }

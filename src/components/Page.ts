@@ -2,12 +2,13 @@ import { ensureElement } from "../utils/utils";
 import { Componet } from "./base/Component";
 import { IEvents } from "./base/events";
 
-export interface IPage {
+interface IPage {
     catalog: HTMLElement[];
     counter: number;
+    locked: boolean;
 }
 
-export class Page extends Componet<IPage>{
+export class Page extends Componet<IPage> {
     protected productsCatalog: HTMLElement;
     protected basketElement: HTMLButtonElement;
     protected counterElement: HTMLElement;
@@ -17,11 +18,11 @@ export class Page extends Componet<IPage>{
         super(container);
         this.events = events;
 
-        this.productsCatalog = ensureElement<HTMLElement>('.gallery', container);
-        this.basketElement = ensureElement<HTMLButtonElement>('.header__basket', container);
-        this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', container);
+        this.productsCatalog = ensureElement<HTMLElement>('.gallery', this.container);
+        this.basketElement = ensureElement<HTMLButtonElement>('.header__basket', this.container);
+        this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', this.container);
 
-        this.basketElement.addEventListener('click', () => this.events.emit('basket:open'))
+        this.basketElement.addEventListener('click', () => this.events.emit('basket:open'));
     }
 
     set catalog(items: HTMLElement[]) {
@@ -30,5 +31,13 @@ export class Page extends Componet<IPage>{
 
     set counter(value: number) {
         this.setText(this.counterElement, value);
+    }
+
+    setLocked(value: boolean) {
+        if (value) {
+            this.container.classList.add('page__wrapper_locked');
+        } else {
+            this.container.classList.remove('page__wrapper_locked');
+        }
     }
 }

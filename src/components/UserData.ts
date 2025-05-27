@@ -1,8 +1,8 @@
-import { IUser, IUserData, TMethodOfPayment } from "../types";
+import { IUser, IUserData } from "../types";
 import { IEvents } from "./base/events";
 
 export class UserData implements IUserData {
-    protected userData: IUser;
+    protected userData: Partial<IUser>;
     protected _error: string;
     protected events: IEvents;
 
@@ -10,39 +10,55 @@ export class UserData implements IUserData {
         this.events = events;
     }
 
-    setUserData(data: IUser): void {
-        this.userData = data
-        this.events.emit('user:changed');
+    setUserData(data: Partial<IUser>): void {
+        this.userData = {
+            ...this.userData,
+            ...data
+        };
+
+        if(this.hasKey(data, ['payment', 'address'])) {
+            this.events.emit('user-order:changed');
+        } else {
+            this.events.emit('user-contacts:changed');
+        };
     }
 
-    // protected isPayment(value: string): value is TMethodOfPayment {
-    //     return ['online' , 'cash'].includes(value);
-    // }
+    protected hasKey(data: object, keys: string[]) {
+        return keys.some(key => Object.keys(data).includes(key));
+    }
 
-    getUserData(): IUser {
+    getUserData(): Partial<IUser> {
         return {...this.userData};
     }
 
-    checkUserValidation(data: Partial<IUser>): boolean {
-        for (const [key, value] of Object.entries(data)) {
-        if (!value) {
-            switch (key) {
-                case 'payment':
-                    this._error = 'Выберите тип оплаты';
-                    return false;
-                case 'address':
-                    this._error = 'Введите адрес';
-                    return false;
-                case 'email':
-                    this._error = 'Введите почту';
-                    return false;
-                case 'phone':
-                    this._error = 'Введите номер телефона';
-                    return false;
-            }
-        }
+    checkOrderValidation(): boolean {
+        if((this.userData.payment && this.userData.address) || (this.userData.email && this.userData.phone)) {
+            this._error = '';
+            return true
+        } else if(!this.userData.payment) {
+            this._error = 'Выберите тип оплаты';
+            return false
+        } else if(!this.userData.address) {
+            this._error = 'Введите адрес';
+            return false
+        };
     }
-    return true;
+
+    checkContactsValidation(): boolean {
+        if(this.userData.email && this.userData.phone) {
+            this._error = '';
+            return true
+        } else if(!this.userData.email) {
+            this._error = 'Введите почту';
+            return false
+        } else if(!this.userData.phone) {
+            this._error = 'Введите номер телефона';
+            return false
+        };
+    }
+
+    clearUserData() {
+        this.userData = {};
     }
 
     get error() {
