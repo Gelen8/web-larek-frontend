@@ -23,7 +23,7 @@ export abstract class Form<T> extends Componet<IFormState> {
 
         this.container.addEventListener('submit', (evt: Event) => {
             evt.preventDefault();
-            this.events.emit(`${container.name}:submit`, this.getInputValues());
+            this.events.emit(`${container.name}:submit`);
         });
 
         this.container.addEventListener('input', (evt: Event) => {
@@ -35,14 +35,6 @@ export abstract class Form<T> extends Componet<IFormState> {
                 value
             })
         })
-    }
-
-    getInputValues() {
-        const valuesObject: Record<string, string> = {};
-        this.inputs.forEach((element) => {
-            valuesObject[element.name] = element.value;
-        });
-        return valuesObject;
     }
 
     set valid(value: boolean) {

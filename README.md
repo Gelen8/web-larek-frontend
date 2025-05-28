@@ -91,11 +91,10 @@ interface IUser {
 Интерфейс для модели данных пользователя
 ```
 interface IUserData {
-    error: string;
+    errors: Partial<Record<keyof IUser, string>>;
     setUserData (data: Partial<IUser>): void;
     getUserData(): Partial<IUser>;
-    checkOrderValidation(data: Partial<IUser>): boolean;
-    checkContactsValidation(): boolean;
+    checkUserValidation(): void;
     clearUserData(): void;
 }
 ```
@@ -194,17 +193,16 @@ export interface IOrderResult {
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
 - userData: IUser - данные пользователя
-- _error: - текст ошибки валидации
+- _errors: - текст ошибки валидации
 - events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных
 
 Методы класса:
 - setUserData (data: Partial<IUser>): void; - устанавливает данные пользователя
 - getUserData(): Partial<IUser> - возвращает данные пользователя
-- checkOrderValidation(data: Partial<IUser>): boolean - валидирует данные пользователя для формы заказа
-- checkContactsValidation(): boolean - валидирует данные пользователя для формы контактов
+- checkUserValidation(): void - проверяет валидацию данных пользователя
 - clearUserData(): void - очищает данные пользователя
 
-Геттер для свойства `error`
+Геттер для свойства `errors`
 
 ### Слой представления
 Все классы представления отвечают за отображение внутри контейнера (DOM элемент) передаваемых данных.
@@ -349,9 +347,6 @@ export interface IOrderResult {
 - valid
 - errors
 
-Методы класса:
-- getInputValues(): Record<string, string> - возвращает объект полей ввода формы и их значений
-
 #### Класс OrderForm
 Реализует отображение формы оформления заказа.
 - constructor(container: HTMLElement, events: IEvents) - конструктор принимает в качестве параметров корневой HTMLElement компонента и экземпляр класса `EventEmitter` для возможности инициации событий. В конструкторе происходит поиск необходимых элементов разметки. 
@@ -402,8 +397,7 @@ export interface IOrderResult {
 - `cards:changed` - изменение массива карточек товаров в каталоге
 - `basket:changed` - изменение массива карточек товаров в корзине
 - `card:selected` - изменение открываемой в модальном окне карточки
-- `user-order:changed` - изменение данных пользователя для заказа
-- `user-contacts:changed` - изменение контактных данных пользователя
+- `user:changed` - изменение данных пользователя
 
 *События, возникающие при взаимодействии пользователя с интерфейсом (генерируются классами, отвечающими за представление)*
 - `basket:open` - открытие Корзины в модальном окне

@@ -18,7 +18,7 @@ export class CardBasket extends Card<ICardBasket> {
         this.idexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
         this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
 
-        this.deleteButton.addEventListener('click', () => this.events.emit('card:delete', {card: this}))
+        this.deleteButton.addEventListener('click', () => this.events.emit('card:delete', {id: this.cardId}))
     }
 
     set index(value: number) {

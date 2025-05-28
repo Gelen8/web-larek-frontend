@@ -21,11 +21,28 @@ export class CardModal extends Card<TCardModal> {
         this.productDescription = ensureElement<HTMLElement>('.card__text', this.container);
         this.cardButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
 
-        this.cardButton.addEventListener('click', () => this.events.emit('basket:change', {card: this}));
+        this.cardButton.addEventListener('click', () => this.events.emit('basket:change', {id: this.cardId}));
     }
 
     set category(value: string) {
         this.setText(this.productCategory, value);
+        this.productCategory.classList.remove('card__category_other', 'card__category_additional', 'card__category_button', 'card__category_hard', 'card__category_soft');
+        switch(value) {
+            case 'софт-скил':
+                this.productCategory.classList.add('card__category_soft');
+                break
+            case 'другое':
+                this.productCategory.classList.add('card__category_other');
+                break
+            case 'дополнительное':
+                this.productCategory.classList.add('card__category_additional');
+                break
+            case 'кнопка':
+                this.productCategory.classList.add('card__category_button');
+                break
+            case 'хард-скил':
+                this.productCategory.classList.add('card__category_hard');
+        };
     }
 
     set image(value: string) {

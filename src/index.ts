@@ -57,9 +57,8 @@ events.on('cards:changed', () => {
     });
 });
 
-events.on('card:select', (data: {card: CardCatalog}) => {
-    const {card} = data;
-    catalogData.preview = card.id;
+events.on('card:select', (data: {id: string}) => {
+    catalogData.preview = data.id;
 });
 
 events.on('card:selected', () => {
@@ -83,9 +82,8 @@ events.on('card:selected', () => {
     });
 });
 
-events.on('basket:change', (data: {card: CardCatalog}) => {
-    const {card} = data;
-    const product = catalogData.getProduct(card.id);
+events.on('basket:change', (data: {id: string}) => {
+    const product = catalogData.getProduct(data.id);
 
     if(basketData.hasItem(product.id)) {
         basketData.deleteItem(product.id);
@@ -117,31 +115,14 @@ events.on('basket:changed', () => {
 });
 
 events.on('basket:open', () => {
-    const total = basketData.getTotalPrice();
-    const itemsList = basketData.getItems().map((item, index) => {
-        const cardInstance = new CardBasket(cloneTemplate(cardBasketTemplate), events);
-        return cardInstance.render({...item, index: index + 1})
-    });
-
-    if(itemsList.length) {
-        basket.changeActiveButton(false);
-    } else {
-        basket.changeActiveButton(true);
-    };
-
-    const content = basket.render({
-        itemsList: itemsList,
-        total: total
-    });
-
+    
     modal.render({
-        content: content
+        content: basket.render()
     });
 });
 
-events.on('card:delete', (data: {card: CardBasket}) => {
-    const {card} = data;
-    basketData.deleteItem(card.id);
+events.on('card:delete', (data: {id: string}) => {
+    basketData.deleteItem(data.id);
 })
 
 events.on('order:open', () => {
@@ -151,18 +132,19 @@ events.on('order:open', () => {
     });
 });
 
-events.on('user-order:changed', () => {
+events.on('user:changed', () => {
     const dataUser = userData.getUserData();
-    const valid = userData.checkOrderValidation();
-    const error = userData.error;
-    orderForm.render({...dataUser, valid: valid, error: error});
-});
+    userData.checkUserValidation();
+    const {payment, address, email, phone} = userData.errors;
 
-events.on('user-contacts:changed', () => {
-    const dataUser = userData.getUserData();
-    const valid = userData.checkContactsValidation();
-    const error = userData.error;
-    contactsForm.render({...dataUser, valid: valid, error: error});
+    const validOrder = !payment && !address;
+    const errorOrder = Object.values({payment, address}).filter(i => !!i).join('');
+    console.log(errorOrder)
+    orderForm.render({...dataUser, valid: validOrder, error: errorOrder});
+
+    const validContacts = !email && !phone;
+    const errorContacts = Object.values({email, phone}).filter(i => !!i).join('');
+    contactsForm.render({...dataUser, valid: validContacts, error: errorContacts});
 });
 
 events.on('payment:change', (data: {button: string}) => {
@@ -208,7 +190,6 @@ events.on('modal:open', () => {
 
 events.on('modal:close', () => {
     page.setLocked(false);
-    userData.clearUserData();
 });
 
 api.getCardList()

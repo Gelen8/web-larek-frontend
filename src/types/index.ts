@@ -33,11 +33,10 @@ export interface IUser {
 }
 
 export interface IUserData {
-    error: string;
+    errors: Partial<Record<keyof IUser, string>>;
     setUserData (data: Partial<IUser>): void;
     getUserData(): Partial<IUser>;
-    checkOrderValidation(data: Partial<IUser>): boolean;
-    checkContactsValidation(): boolean;
+    checkUserValidation(): void;
     clearUserData(): void;
 }
 
